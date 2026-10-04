@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,14 +28,17 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Accept Android Licenses
-        run: yes | sdkmanager --licenses || true
+        shell: bash
+        run: |
+          set +o pipefail
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
 
-      - name: Install Android SDK Packages
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Install Android SDK
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
